@@ -2,15 +2,20 @@
 
 ## How to run
 
+    javac -d out src\edu\itc\se\lab01\task2\*.java
+    java -cp out edu.itc.se.lab01.task2.Bench
+
 `Bench.run` starts 8 threads, each calling `increment()` 1,000,000 times, joins them, and prints the final value, whether it equals 8,000,000, and the elapsed time measured with `System.nanoTime()`.
 
 ## The race
 
-`count++` on a plain `long` is three steps: read, add 1, write back. Two threads can read the same value and both write value + 1, so one increment is lost: count = 0
-T1: read 0
-T2: read 0
-T1: write 1
-T2: write 1 -> count = 1, expected 2
+`count++` on a plain `long` is three steps: read, add 1, write back. Two threads can read the same value and both write value + 1, so one increment is lost:
+
+    count = 0
+    T1: read 0
+    T2: read 0
+    T1: write 1
+    T2: write 1     -> count = 1, expected 2
 
 ## Results
 
@@ -36,10 +41,8 @@ These numbers come from a simple wall-clock benchmark with no JIT warm-up, so in
 
 ## Question: why is synchronizing only `increment()` still a bug?
 
-```java
-public synchronized void increment() { count++; }
-public long get() { return count; }   // not synchronized
-```
+    public synchronized void increment() { count++; }
+    public long get() { return count; }   // not synchronized
 
 `synchronized` gives two guarantees: **mutual exclusion** (only one thread runs the code at a time) and **visibility** (when a thread releases a lock, its writes become visible to the next thread that acquires the same lock). The Java Memory Model only promises visibility between threads that lock the **same** monitor.
 
